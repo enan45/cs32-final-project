@@ -50,20 +50,20 @@ class Board:
 
     def block_cell(self, col, row):
         """Mark a cell as BLOCKED (used for component bodies)."""
+
         cell = self.get_cell(col, row)
         cell.state = Cell.BLOCKED
 
     def place_pad(self, col, row, net_id):
         """Mark a cell as a PAD belonging to a specific net."""
+
         cell = self.get_cell(col, row)
         cell.state  = Cell.PAD
         cell.net_id = net_id
 
     def mark_trace(self, path, net_id):
-        """Mark all FREE cells in a path as TRACE cells for this net.
+        """Mark all FREE cells in a path as TRACE cells for this net. important not to overwrite endpoints as pads."""
 
-        Note: doesn't overwrite pads — the endpoints stay as PADs.
-        """
         for col, row in path:
             cell = self.get_cell(col, row)
             if cell.state == Cell.FREE:
@@ -72,6 +72,7 @@ class Board:
 
     def neighbors(self, col, row, net_id):
         """Find all passable neighboring cells for this net."""
+        
         result = []
         for dc, dr in Board.DIRECTIONS:
             nc, nr = col + dc, row + dr
