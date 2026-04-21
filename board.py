@@ -30,11 +30,7 @@ class Cell:
 
 
 class Board:
-    """The PCB board — a 2D grid of Cell objects.
-
-    Indexed as grid[row][col]. Uses standard coordinate system where
-    (0,0) is bottom-left.
-    """
+    """The PCB board 2D grid. (0,0) is bottom-left."""
 
     # All four neighbor directions — no diagonals
     DIRECTIONS = [(0, 1), (0, -1), (1, 0), (-1, 0)]
