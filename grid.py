@@ -64,7 +64,7 @@ class Grid:
 
     def mark_trace(self, path):
         """After routing, mark the path cells as trace.
-        Pads stay as pads — we don't overwrite them.
+        Pads stay as pads without being overwritten.
         """
         for col, row in path:
             cell = self.get(col, row)
