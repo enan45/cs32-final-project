@@ -24,8 +24,13 @@ class Grid:
     def __init__(self, cols, rows): # three attributes
         self.cols = cols
         self.rows = rows
-        # 2D list indexed as grid[row][col]
-        self.cells = [[Cell(c, r) for c in range(cols)] for r in range(rows)]
+
+        self.cells = []
+        for r in range(rows):
+            row = []
+            for c in range(cols):
+                row.append(Cell(c, r))
+            self.cells.append(row)
 
     def in_bounds(self, col, row):
         """Is (col, row) inside the grid?"""
