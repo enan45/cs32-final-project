@@ -17,14 +17,16 @@ def find_path(grid, source, target):
         target: (col, row) tuple — the goal cell
 
     Returns:
-        A list of (col, row) tuples from source to target (inclusive),
+        A list of (col, row) tuples from source to target,
         or None if no path exists.
     """
-    # FIFO queue of cells to expand
-    frontier = deque([source])
+    # FIFO queue of cells to expand. double ended queue.
+    frontier = deque()
+    frontier.append(source)
 
-    # Cells we've already visited (prevents infinite loops)
-    visited = {source}
+    # keep track of cells we've already visited
+    visited = set()
+    visited.add(source)
 
     # For each visited cell, which cell did we reach it from?
     came_from = {source: None}
