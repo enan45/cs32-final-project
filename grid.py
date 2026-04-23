@@ -24,8 +24,9 @@ class Grid:
     def __init__(self, cols, rows): # three attributes
         self.cols = cols
         self.rows = rows
-
         self.cells = []
+
+        # 2D list indexed as grid[row][col]
         for r in range(rows):
             row = []
             for c in range(cols):
