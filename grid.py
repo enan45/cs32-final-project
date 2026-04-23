@@ -52,7 +52,7 @@ class Grid:
 
     def block(self, col, row):
         """Mark a cell as blocked (component body)."""
-        self.get(col, row).state = Cell.BLOCKED
+        self.get(col, row).state = Cell.BLOCKED #returns the actual Cell object inside the grid, state to Blocked
 
     def place_pad(self, col, row):
         """Mark a cell as a pad (connection point)."""
