@@ -82,13 +82,14 @@ class Grid:
         return result
 
     def print_ascii(self):
-        """ASCII print for debugging. Top row prints first."""
+        """ASCII print for initial debugging. Top row prints first."""
         # Row 0 is at the bottom in our coordinate system,
         # so iterate from the top down
         for r in range(self.rows - 1, -1, -1):
             line = ''
             for c in range(self.cols):
                 cell = self.get(c, r)
+
                 if cell.state == Cell.FREE:
                     line += '.'
                 elif cell.state == Cell.BLOCKED:
@@ -97,4 +98,5 @@ class Grid:
                     line += 'P'
                 elif cell.state == Cell.TRACE:
                     line += '*'
+                    
             print(line)
