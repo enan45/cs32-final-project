@@ -36,7 +36,7 @@ def build_555_timer():
     """
     grid = Grid(cols=20, rows=20)
 
-    # 555 chip body---> 3 columns wide, 4 rows tall, centered in the grid
+    ## 555 chip body---> 3 columns wide, 4 rows tall, centered in the grid
 
     chip_left,  chip_right = 7, 9
     chip_bot,   chip_top   = 9, 12
@@ -44,7 +44,7 @@ def build_555_timer():
         for r in range(chip_bot, chip_top + 1):
             grid.block(c, r)
 
-    # Chip pads
+    ## Chip pads
     # Left side: pin 1 (bottom) to pin 4 (top)
     pin1 = (chip_left - 1, chip_bot)      # GND
     pin2 = (chip_left - 1, chip_bot + 1)  # TRIG
@@ -57,7 +57,7 @@ def build_555_timer():
     pin6 = (chip_right + 1, chip_bot + 2)  # THR
     pin5 = (chip_right + 1, chip_top)      # CTL
 
-    # --- External component bodies ---
+    ## External component bodies
     # R1 above the chip
     for c in range(6, 9):
         grid.block(c, 16)
@@ -70,13 +70,13 @@ def build_555_timer():
     c1_top    = (7, 6)   # C1's top lead, connects to TRIG
     c1_bottom = (7, 4)   # C1's bottom lead, goes to GND
 
-    # --- Place all pads on the grid ---
+    # Place all pads on the grid
     all_pads = [pin1, pin2, pin3, pin4, pin5, pin6, pin7, pin8,
                 r1_bottom, r1_top, c1_top, c1_bottom]
     for col, row in all_pads:
         grid.place_pad(col, row)
 
-    # --- Net list ---
+    # generate Net list
     # Each net lists the pads that must be electrically connected
     pads = {
         'VCC':  [pin8, pin4, r1_top],
