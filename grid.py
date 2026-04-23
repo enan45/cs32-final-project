@@ -53,7 +53,8 @@ class Grid:
     def block(self, col, row):
         """Mark a cell as blocked (component body)."""
         if self.in_bounds(col, row): #check if the position is within the grid boundaries before blocking
-            self.get(col, row).state = Cell.BLOCKED
+            cell = self.get(col, row)
+            cell.state = Cell.BLOCKED
 
     def place_pad(self, col, row):
         """Mark a cell as a pad (connection point)."""
