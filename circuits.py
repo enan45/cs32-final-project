@@ -27,8 +27,8 @@ from grid import Grid, Cell
 def build_555_timer():
     """A 555 timer astable oscillator circuit on a 20x20 grid.
 
-    The 555 DIP-8 chip sits in the middle. Pins 1-4 are on the left,
-    pins 5-8 are on the right. External components (R1, C1) surround it.
+    The 555 DIP-8 chip sits in the middle with Pins 1-4 are on the left,
+    pins 5-8 on the right and External components (R1, C1) arround it.
 
     Returns:
         grid: the Grid with obstacles and pads placed
@@ -36,8 +36,8 @@ def build_555_timer():
     """
     grid = Grid(cols=20, rows=20)
 
-    # --- 555 chip body ---
-    # 3 columns wide, 4 rows tall, centered in the grid
+    # 555 chip body---> 3 columns wide, 4 rows tall, centered in the grid
+    
     chip_left,  chip_right = 7, 9
     chip_bot,   chip_top   = 9, 12
     for c in range(chip_left, chip_right + 1):
