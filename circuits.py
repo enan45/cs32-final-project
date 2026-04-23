@@ -74,6 +74,7 @@ def build_555_timer():
     # Place all pads on the grid
     all_pads = [pin1, pin2, pin3, pin4, pin5, pin6, pin7, pin8,
                 r1_bottom, r1_top, c1_top, c1_bottom]
+    
     for col, row in all_pads:
         grid.place_pad(col, row)
 
