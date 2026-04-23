@@ -3,8 +3,8 @@
 
 
 class Net:
-    """An electrical connection between two pads.
-
+    """
+    An electrical connection between two pads.
     Every net has a unique id, two endpoint coordinates (start and goal),
     and after routing, a path of grid cells.
     """
