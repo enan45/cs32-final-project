@@ -48,7 +48,7 @@ def find_path(grid, source, target):
         for neighbor in neighbors:
           cell = grid.get(neighbor[0], neighbor[1])
 
-          if cell.state == cell.PAD:
+          if cell.state == Cell.PAD:
             if neighbor not in allowed_pads:
               continue
             if neighbor not in visited:
