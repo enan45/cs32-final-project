@@ -56,7 +56,7 @@ def astar_route(board, net):
 
         # Explore neighbors
         for nc, nr in board.neighbors(col, row, net.net_id):
-            new_g = g + 1
+            new_g = g + cell_cost(board, nc, nr, net.net_id)
             if new_g < best_cost.get((nc, nr), float('inf')):
                 best_cost[(nc, nr)] = new_g
                 came_from[(nc, nr)] = current
@@ -87,3 +87,18 @@ def route_all(board, nets):
             print(f"  FAILED  {net}")
 
     return routed_count, failed_count
+
+def cell_cost(board, col, row, net_id):
+    """Cost to enter this cell. 1.0 is baseline, higher = avoid."""
+    # Check if any adjacent cell (within 1) belongs to another net
+    for dc in [-1, 0, 1]:
+        for dr in [-1, 0, 1]:
+            if dc == 0 and dr == 0:
+                continue
+            nc, nr = col + dc, row + dr
+            if board.in_bounds(nc, nr):
+                neighbor = board.get_cell(nc, nr)
+                if (neighbor.state in ('TRACE', 'PAD')
+                    and neighbor.net_id != net_id):
+                    return 3.0  # Penalty for being near another net
+    return 1.0
