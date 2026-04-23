@@ -1,3 +1,6 @@
+from pyparsing import col
+
+
 class Cell:
     """One cell on the PCB grid."""
 
@@ -34,8 +37,15 @@ class Grid:
             self.cells.append(row)
 
     def in_bounds(self, col, row):
-        """Is (col, row) inside the grid?"""
-        return 0 <= col < self.cols and 0 <= row < self.rows
+        """Check if (col, row) is within the grid boundaries."""
+        # Check if column is between 0 and the last column
+        if col < 0 or col >= self.cols:
+            return False
+         # Check if row is between 0 and the last row
+        if row < 0 or row >= self.rows:
+            return False
+        # If both checks passed, the position is inside the grid
+        return True
 
     def get(self, col, row):
         """Return the Cell at (col, row)."""
