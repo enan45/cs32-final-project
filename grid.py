@@ -47,7 +47,7 @@ class Grid:
         # If both checks passed, the position is inside the grid
         return True
 
-    def get(self, col, row):
+    def get(self, col, row): # think of this as x then y cordinates
         """Return the Cell at (col, row)."""
         return self.cells[row][col]
 
