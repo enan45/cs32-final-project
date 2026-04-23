@@ -25,14 +25,12 @@ from grid import Grid, Cell
 
 
 def build_555_timer():
-    """A 555 timer astable oscillator circuit on a 20x20 grid.
+    """
+    A 555 timer astable oscillator circuit on a 20x20 grid.
 
     The 555 DIP-8 chip sits in the middle with Pins 1-4 are on the left,
     pins 5-8 on the right and External components (R1, C1) arround it.
 
-    Returns:
-        grid: the Grid with obstacles and pads placed
-        pads: a dict mapping net names to lists of (col, row) pad locations
     """
     grid = Grid(cols=20, rows=20)
 
@@ -86,7 +84,7 @@ def build_555_timer():
         'TRIG': [pin2, pin6, c1_top],
         'OUT':  [pin3],
         'DISCHG': [pin7, r1_bottom],
-        'CTL':  [pin5],                 
+        'CTL':  [pin5],
     }
 
     return grid, pads
