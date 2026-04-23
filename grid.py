@@ -58,7 +58,9 @@ class Grid:
 
     def place_pad(self, col, row):
         """Mark a cell as a pad (connection point)."""
-        self.get(col, row).state = Cell.PAD
+        if self.in_bounds(col, row): #check if the position is within the grid boundaries before placing a pad
+            cell = self.get(col, row)
+            cell.state = Cell.PAD
 
     def mark_trace(self, path):
         """After routing, mark the path cells as trace.
