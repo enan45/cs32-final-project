@@ -98,5 +98,5 @@ class Grid:
                     line += 'P'
                 elif cell.state == Cell.TRACE:
                     line += '*'
-                    
+
             print(line)
