@@ -38,22 +38,28 @@ def find_path(grid, source, target):
         if current == target:
             return reconstruct_path(came_from, target)
 
-        # Expand neighbors
         col, row = current
-        for neighbor in grid.neighbors(col, row):
+        neighbors = grid.neighbors(col, row)
+
+
+        for neighbor in neighbors:
             if neighbor not in visited:
                 visited.add(neighbor)
                 came_from[neighbor] = current
                 frontier.append(neighbor)
 
-    # Frontier emptied without finding target — no path exists
+    # no path found
     return None
 
 
 def reconstruct_path(came_from, target):
-    """Walk came_from backwards from target to source, then reverse."""
+    """
+    Rebuild the path by starting at the target
+    and walking backward to the source.
+    """
     path = []
     current = target
+    
     while current is not None:
         path.append(current)
         current = came_from[current]
