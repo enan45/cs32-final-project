@@ -21,6 +21,8 @@ def find_path(grid, source, target):
         A list of (col, row) tuples from source to target,
         or None if no path exists.
     """
+    allowed_pads = {source, target}
+
     # FIFO queue of cells to expand. double ended queue.
     frontier = deque()
     frontier.append(source)
@@ -44,8 +46,12 @@ def find_path(grid, source, target):
 
 
         for neighbor in neighbors:
-            if grid.get(*neighbor).state == Cell.PAD and neighbor not in allowed_pads:
-                continue  # Skip pads that is not source or target
+          cell = grid.get(neighbor[0], neighbor[1])
+
+          if cell.state == cell.PAD:
+            if neighbor not in allowed_pads:
+              continue
+            
             if neighbor not in visited:
                 visited.add(neighbor)
                 came_from[neighbor] = current
