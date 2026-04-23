@@ -67,9 +67,10 @@ class Grid:
         Pads stay as pads without being overwritten.
         """
         for col, row in path:
-            cell = self.get(col, row)
-            if cell.state == Cell.FREE:
-                cell.state = Cell.TRACE
+            if self.in_bounds(col, row): #check if the position is within the grid boundaries before marking a trace
+                cell = self.get(col, row)
+                if cell.state == Cell.FREE:# Only mark as trace if the cell is currently free.
+                    cell.state = Cell.TRACE
 
     def neighbors(self, col, row):
         """Return list of passable neighboring (col, row) tuples."""
