@@ -12,16 +12,16 @@ class Cell:
         self.state = Cell.FREE
 
     def is_passable(self):
-        """For step 1: free cells and pads can be entered."""
+        """for now free cells and pads can be entered."""
         return self.state in (Cell.FREE, Cell.PAD)
 
 class Grid:
-    """A 2D grid of Cell objects for PCB routing."""
+    """2D grid of Cell objects routing."""
 
-    # The four neighbor directions — no diagonals (Manhattan routing)
+    # Manhattan routing: right, left, down, up
     DIRECTIONS = [(0, 1), (0, -1), (1, 0), (-1, 0)]
 
-    def __init__(self, cols, rows):
+    def __init__(self, cols, rows): # three attributes
         self.cols = cols
         self.rows = rows
         # 2D list indexed as grid[row][col]
