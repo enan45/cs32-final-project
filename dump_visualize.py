@@ -1,5 +1,12 @@
 ### FP/visualize.py
 """Board visualization — both ASCII and matplotlib versions."""
+"""
+    A 555 timer astable oscillator circuit on a 20x20 grid.
+
+    The 555 DIP-8 chip sits in the middle with Pins 1-4 are on the left,
+    pins 5-8 on the right and External components (R1, C1) arround it.
+
+    """
 
 try:
     import matplotlib.pyplot as plt
