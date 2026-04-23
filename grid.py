@@ -84,7 +84,7 @@ class Grid:
     def print_ascii(self):
         """ASCII print for debugging. Top row prints first."""
         # Row 0 is at the bottom in our coordinate system,
-        # so we iterate from the top down
+        # so iterate from the top down
         for r in range(self.rows - 1, -1, -1):
             line = ''
             for c in range(self.cols):
