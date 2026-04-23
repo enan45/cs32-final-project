@@ -36,7 +36,7 @@ class Grid:
             self.cells.append(row)
 
     def in_bounds(self, col, row):
-        """Check if (col, row) is within the grid boundaries."""
+        """Check if individual cell (col, row) is within the grid boundaries."""
         # Check if column is between 0 and the last column
         if col < 0 or col >= self.cols:
             return False
