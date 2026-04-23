@@ -9,85 +9,54 @@ I will later figure out theManhattan heuristic to make it A* proper.
 from collections import deque
 from grid import Grid, Cell
 
-# def find_path(grid, source, target):
-#     """Find the shortest path from source to target using BFS.
-
-#     Args:
-#         grid: Grid object from grid.py
-#         source: (col, row) tuple — the starting cell
-#         target: (col, row) tuple — the goal cell
-
-#     Returns:
-#         A list of (col, row) tuples from source to target,
-#         or None if no path exists.
-#     """
-#     allowed_pads = {source, target}
-
-#     # FIFO queue of cells to expand. double ended queue.
-#     frontier = deque()
-#     frontier.append(source)
-
-#     # keep track of cells we've already visited
-#     visited = set()
-#     visited.add(source)
-
-#     # For each visited cell, which cell did we reach it from?
-#     came_from = {source: None}
-
-#     while frontier:
-#         current = frontier.popleft()
-
-#         # stop if we reached the target
-#         if current == target:
-#             return reconstruct_path(came_from, target)
-
-#         col, row = current
-#         neighbors = grid.neighbors(col, row)
-
-
-#         for neighbor in neighbors:
-#           cell = grid.get(neighbor[0], neighbor[1])
-
-#           if cell.state == cell.PAD:
-#             if neighbor not in allowed_pads:
-#               continue
-
-#             if neighbor not in visited:
-#                 visited.add(neighbor)
-#                 came_from[neighbor] = current
-#                 frontier.append(neighbor)
-
-#     # no path found
-#     return None
 def find_path(grid, source, target):
-    from grid import Cell
+    """Find the shortest path from source to target using BFS.
+
+    Args:
+        grid: Grid object from grid.py
+        source: (col, row) tuple — the starting cell
+        target: (col, row) tuple — the goal cell
+
+    Returns:
+        A list of (col, row) tuples from source to target,
+        or None if no path exists.
+    """
     allowed_pads = {source, target}
 
-    frontier  = deque([source])
-    visited   = {source}
+    # FIFO queue of cells to expand. double ended queue.
+    frontier = deque()
+    frontier.append(source)
+
+    # keep track of cells we've already visited
+    visited = set()
+    visited.add(source)
+
+    # For each visited cell, which cell did we reach it from?
     came_from = {source: None}
 
-    iterations = 0
     while frontier:
-        iterations += 1
         current = frontier.popleft()
 
+        # stop if we reached the target
         if current == target:
-            print(f"Found target after {iterations} iterations")
             return reconstruct_path(came_from, target)
 
         col, row = current
-        for neighbor in grid.neighbors(col, row):
-            if grid.get(*neighbor).state == Cell.PAD and neighbor not in allowed_pads:
-                continue
+        neighbors = grid.neighbors(col, row)
+
+
+        for neighbor in neighbors:
+          cell = grid.get(neighbor[0], neighbor[1])
+
+          if cell.state == cell.PAD:
+            if neighbor not in allowed_pads:
+              continue
             if neighbor not in visited:
                 visited.add(neighbor)
                 came_from[neighbor] = current
                 frontier.append(neighbor)
 
-    print(f"Frontier exhausted after {iterations} iterations")
-    print(f"Visited {len(visited)} cells")
-    print(f"Sample visited cells: {sorted(visited)[:20]}...{sorted(visited)[-20:]}")
+    # no path found
     return None
 
 
