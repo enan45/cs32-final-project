@@ -7,6 +7,7 @@ I will later figure out theManhattan heuristic to make it A* proper.
 """
 
 from collections import deque
+from grid import Grid, Cell
 
 def find_path(grid, source, target):
     """Find the shortest path from source to target using BFS.
@@ -59,7 +60,7 @@ def reconstruct_path(came_from, target):
     """
     path = []
     current = target
-    
+
     while current is not None:
         path.append(current)
         current = came_from[current]
