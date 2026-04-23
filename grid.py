@@ -1,5 +1,4 @@
-from pyparsing import col
-
+### grid.py
 
 class Cell:
     """One cell on the PCB grid."""
