@@ -58,10 +58,11 @@ def build_555_timer():
     pin5 = (chip_right + 1, chip_top)      # CTL
 
     ## External component bodies
-    # R1 above the chip
     for c in range(6, 9):
         grid.block(c, 16)
-    r1_bottom = (7, 15)  # R1's bottom lead, near pin 7
+
+    # R1 above the chip
+    r1_bottom = (7, 15)  # R1's bottom lead
     r1_top    = (7, 17)  # R1's top lead, goes to VCC rail
 
     # C1 below the chip
