@@ -34,7 +34,7 @@ def find_path(grid, source, target):
     while frontier:
         current = frontier.popleft()
 
-        # Found it — stop and reconstruct the path
+        # stop if we reached the target
         if current == target:
             return reconstruct_path(came_from, target)
 
