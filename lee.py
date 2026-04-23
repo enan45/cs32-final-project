@@ -51,6 +51,7 @@ def find_path(grid, source, target):
           if cell.state == Cell.PAD:
             if neighbor not in allowed_pads:
               continue
+
             if neighbor not in visited:
                 visited.add(neighbor)
                 came_from[neighbor] = current
