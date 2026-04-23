@@ -37,14 +37,14 @@ def build_555_timer():
     grid = Grid(cols=20, rows=20)
 
     # 555 chip body---> 3 columns wide, 4 rows tall, centered in the grid
-    
+
     chip_left,  chip_right = 7, 9
     chip_bot,   chip_top   = 9, 12
     for c in range(chip_left, chip_right + 1):
         for r in range(chip_bot, chip_top + 1):
             grid.block(c, r)
 
-    # --- Chip pads ---
+    # Chip pads
     # Left side: pin 1 (bottom) to pin 4 (top)
     pin1 = (chip_left - 1, chip_bot)      # GND
     pin2 = (chip_left - 1, chip_bot + 1)  # TRIG
