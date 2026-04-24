@@ -18,7 +18,7 @@
 
 import sys
 import math
-import visualize
+import pygame
 
 from grid     import Cell
 from lee      import find_path_stepped
@@ -68,16 +68,16 @@ PATH_DRAW_MS    = 80       # ms per cell when drawing the final path
 def visualize_route(grid, source, target, net_name="NET",
                     title="PCB Auto-Router — Lee's Algorithm"):
     """Open a Pygame window and animate a single-net route live."""
-    visualize.init()
-    visualize.display.set_caption(title)
+    pygame.init()
+    pygame.display.set_caption(title)
 
     board_w = grid.cols * CELL_SIZE
     board_h = grid.rows * CELL_SIZE
     win_w   = board_w + 2 * MARGIN + PANEL_WIDTH
     win_h   = board_h + 2 * MARGIN
 
-    screen = visualize.display.set_mode((win_w, win_h))
-    clock  = visualize.time.Clock()
+    screen = pygame.display.set_mode((win_w, win_h))
+    clock  = pygame.time.Clock()
 
     # Font setup — try nice fonts, fall back gracefully
     font_big    = _load_font(24, bold=True)
@@ -88,8 +88,8 @@ def visualize_route(grid, source, target, net_name="NET",
     fonts = {'big': font_big, 'med': font_med,
              'small': font_small, 'mono': font_mono}
 
-    board_rect = visualize.Rect(MARGIN, MARGIN, board_w, board_h)
-    panel_rect = visualize.Rect(board_w + 2*MARGIN, MARGIN, PANEL_WIDTH, board_h)
+    board_rect = pygame.Rect(MARGIN, MARGIN, board_w, board_h)
+    panel_rect = pygame.Rect(board_w + 2*MARGIN, MARGIN, PANEL_WIDTH, board_h)
 
     # Run the generator through the search
     stepper = find_path_stepped(grid, source, target)
@@ -105,15 +105,15 @@ def visualize_route(grid, source, target, net_name="NET",
     while running and not search_done:
         dt = clock.tick(60)
 
-        for event in visualize.event.get():
-            if event.type == visualize.QUIT:
-                visualize.quit()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
                 return
-            if event.type == visualize.KEYDOWN:
-                if event.key == visualize.K_SPACE:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
                     paused = not paused
-                if event.key == visualize.K_ESCAPE:
-                    visualize.quit()
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
                     return
 
         # Advance the BFS by some steps per frame
@@ -140,7 +140,7 @@ def visualize_route(grid, source, target, net_name="NET",
             _draw_grid(screen, grid, board_rect, None, source, target, path=None)
         _draw_panel(screen, panel_rect, state, source, target, net_name,
                     fonts, searching=True, paused=paused)
-        visualize.display.flip()
+        pygame.display.flip()
 
     # Phase 2 — dramatic reveal of final path
     if path is not None:
@@ -167,10 +167,10 @@ def _load_font(size, bold=False, mono=False):
                       'DejaVu Sans', 'Arial']
     for name in candidates:
         try:
-            return visualize.font.SysFont(name, size, bold=bold)
+            return pygame.font.SysFont(name, size, bold=bold)
         except Exception:
             continue
-    return visualize.font.Font(None, size)
+    return pygame.font.Font(None, size)
 
 
 def _cell_to_pixel(col, row, grid, board_rect):
@@ -189,11 +189,11 @@ def _cell_center(col, row, grid, board_rect):
 def _draw_background(screen, board_rect, panel_rect):
     screen.fill(C_BG)
     # Board substrate with a subtle inner glow
-    visualize.draw.rect(screen, C_BOARD, board_rect)
-    visualize.draw.rect(screen, C_PANEL_EDGE, board_rect, width=2)
+    pygame.draw.rect(screen, C_BOARD, board_rect)
+    pygame.draw.rect(screen, C_PANEL_EDGE, board_rect, width=2)
     # Panel
-    visualize.draw.rect(screen, C_PANEL_BG, panel_rect)
-    visualize.draw.rect(screen, C_PANEL_EDGE, panel_rect, width=2)
+    pygame.draw.rect(screen, C_PANEL_BG, panel_rect)
+    pygame.draw.rect(screen, C_PANEL_EDGE, panel_rect, width=2)
 
 
 def _draw_grid(screen, grid, board_rect, state, source, target, path=None):
@@ -207,7 +207,7 @@ def _draw_grid(screen, grid, board_rect, state, source, target, path=None):
         for col in range(grid.cols):
             cell = grid.get(col, row)
             px, py = _cell_to_pixel(col, row, grid, board_rect)
-            rect = visualize.Rect(px, py, CELL_SIZE, CELL_SIZE)
+            rect = pygame.Rect(px, py, CELL_SIZE, CELL_SIZE)
 
             if cell.state == Cell.BLOCKED:
                 _draw_component(screen, rect)
@@ -225,7 +225,7 @@ def _draw_grid(screen, grid, board_rect, state, source, target, path=None):
             cell = grid.get(col, row)
             if cell.state in (Cell.FREE, Cell.PAD):
                 cx, cy = _cell_center(col, row, grid, board_rect)
-                visualize.draw.circle(screen, C_GRID_DOT, (cx, cy), 1)
+                pygame.draw.circle(screen, C_GRID_DOT, (cx, cy), 1)
 
     # Pass 3 — the final path (if we have one)
     if path is not None:
@@ -237,7 +237,7 @@ def _draw_grid(screen, grid, board_rect, state, source, target, path=None):
             cell = grid.get(col, row)
             if cell.state == Cell.PAD:
                 px, py = _cell_to_pixel(col, row, grid, board_rect)
-                rect = visualize.Rect(px, py, CELL_SIZE, CELL_SIZE)
+                rect = pygame.Rect(px, py, CELL_SIZE, CELL_SIZE)
                 if (col, row) == source:
                     _draw_pad(screen, rect, C_SOURCE, label='S')
                 elif (col, row) == target:
@@ -248,30 +248,30 @@ def _draw_grid(screen, grid, board_rect, state, source, target, path=None):
     # Pass 5 — the currently-expanding cell gets a bright highlight
     if current is not None and current not in (source, target):
         px, py = _cell_to_pixel(*current, grid, board_rect)
-        rect = visualize.Rect(px, py, CELL_SIZE, CELL_SIZE)
-        visualize.draw.rect(screen, C_CURRENT, rect.inflate(-6, -6), border_radius=4)
+        rect = pygame.Rect(px, py, CELL_SIZE, CELL_SIZE)
+        pygame.draw.rect(screen, C_CURRENT, rect.inflate(-6, -6), border_radius=4)
 
 
 def _draw_component(screen, rect):
     """Draw a blocked cell as dark silicon with a silkscreen outline."""
     inner = rect.inflate(-2, -2)
-    visualize.draw.rect(screen, C_BLOCKED, inner, border_radius=2)
-    visualize.draw.rect(screen, C_BLOCKED_EDGE, inner, width=1, border_radius=2)
+    pygame.draw.rect(screen, C_BLOCKED, inner, border_radius=2)
+    pygame.draw.rect(screen, C_BLOCKED_EDGE, inner, width=1, border_radius=2)
 
 
 def _draw_visited(screen, rect):
     """Draw a cell that has been expanded — translucent red."""
-    surf = visualize.Surface((CELL_SIZE, CELL_SIZE), visualize.SRCALPHA)
-    inner = visualize.Rect(3, 3, CELL_SIZE - 6, CELL_SIZE - 6)
-    visualize.draw.rect(surf, (*C_VISITED, 140), inner, border_radius=3)
+    surf = pygame.Surface((CELL_SIZE, CELL_SIZE), pygame.SRCALPHA)
+    inner = pygame.Rect(3, 3, CELL_SIZE - 6, CELL_SIZE - 6)
+    pygame.draw.rect(surf, (*C_VISITED, 140), inner, border_radius=3)
     screen.blit(surf, rect.topleft)
 
 
 def _draw_frontier(screen, rect):
     """Draw a cell in the open set — brighter green."""
-    surf = visualize.Surface((CELL_SIZE, CELL_SIZE), visualize.SRCALPHA)
-    inner = visualize.Rect(2, 2, CELL_SIZE - 4, CELL_SIZE - 4)
-    visualize.draw.rect(surf, (*C_FRONTIER, 200), inner, border_radius=3)
+    surf = pygame.Surface((CELL_SIZE, CELL_SIZE), pygame.SRCALPHA)
+    inner = pygame.Rect(2, 2, CELL_SIZE - 4, CELL_SIZE - 4)
+    pygame.draw.rect(surf, (*C_FRONTIER, 200), inner, border_radius=3)
     screen.blit(surf, rect.topleft)
 
 
@@ -281,10 +281,10 @@ def _draw_pad(screen, rect, color, label=None):
     radius_outer = CELL_SIZE // 2 - 3
     radius_inner = max(3, CELL_SIZE // 6)
     # Outer copper ring
-    visualize.draw.circle(screen, color, (cx, cy), radius_outer)
-    visualize.draw.circle(screen, (255, 255, 255), (cx, cy), radius_outer, width=1)
+    pygame.draw.circle(screen, color, (cx, cy), radius_outer)
+    pygame.draw.circle(screen, (255, 255, 255), (cx, cy), radius_outer, width=1)
     # Drill hole
-    visualize.draw.circle(screen, C_PAD_HOLE, (cx, cy), radius_inner)
+    pygame.draw.circle(screen, C_PAD_HOLE, (cx, cy), radius_inner)
     # Optional label
     if label:
         font = _load_font(12, bold=True)
@@ -311,25 +311,25 @@ def _draw_path(screen, grid, board_rect, path, progress=1.0):
 
     # Draw glow layer first
     if full_segs >= 1:
-        visualize.draw.lines(screen, C_PATH_GLOW, False,
+        pygame.draw.lines(screen, C_PATH_GLOW, False,
                           points[:full_segs + 1], width=14)
     if full_segs < total_segs and partial > 0:
         p0 = points[full_segs]
         p1 = points[full_segs + 1]
         px = p0[0] + (p1[0] - p0[0]) * partial
         py = p0[1] + (p1[1] - p0[1]) * partial
-        visualize.draw.line(screen, C_PATH_GLOW, p0, (px, py), width=14)
+        pygame.draw.line(screen, C_PATH_GLOW, p0, (px, py), width=14)
 
     # Then the main trace on top
     if full_segs >= 1:
-        visualize.draw.lines(screen, C_PATH, False,
+        pygame.draw.lines(screen, C_PATH, False,
                           points[:full_segs + 1], width=7)
     if full_segs < total_segs and partial > 0:
         p0 = points[full_segs]
         p1 = points[full_segs + 1]
         px = p0[0] + (p1[0] - p0[0]) * partial
         py = p0[1] + (p1[1] - p0[1]) * partial
-        visualize.draw.line(screen, C_PATH, p0, (px, py), width=7)
+        pygame.draw.line(screen, C_PATH, p0, (px, py), width=7)
 
 
 def _draw_panel(screen, panel_rect, state, source, target, net_name, fonts,
@@ -347,7 +347,7 @@ def _draw_panel(screen, panel_rect, state, source, target, net_name, fonts,
     y += 30
 
     # Divider
-    visualize.draw.line(screen, C_PANEL_EDGE,
+    pygame.draw.line(screen, C_PANEL_EDGE,
                      (x, y), (panel_rect.right - 16, y))
     y += 16
 
@@ -364,7 +364,7 @@ def _draw_panel(screen, panel_rect, state, source, target, net_name, fonts,
     y += 28
 
     # Stats
-    visualize.draw.line(screen, C_PANEL_EDGE,
+    pygame.draw.line(screen, C_PANEL_EDGE,
                      (x, y), (panel_rect.right - 16, y))
     y += 16
     _panel_label(screen, fonts, x, y, "SEARCH")
@@ -382,7 +382,7 @@ def _draw_panel(screen, panel_rect, state, source, target, net_name, fonts,
     y += 28
 
     # Status
-    visualize.draw.line(screen, C_PANEL_EDGE,
+    pygame.draw.line(screen, C_PANEL_EDGE,
                      (x, y), (panel_rect.right - 16, y))
     y += 16
     _panel_label(screen, fonts, x, y, "STATUS")
@@ -433,7 +433,7 @@ def _panel_kv(screen, fonts, x, y, key, value):
 
 
 def _legend_row(screen, fonts, x, y, color, label):
-    visualize.draw.rect(screen, color, (x, y + 3, 14, 14), border_radius=2)
+    pygame.draw.rect(screen, color, (x, y + 3, 14, 14), border_radius=2)
     surf = fonts['small'].render(label, True, C_TEXT)
     screen.blit(surf, (x + 24, y))
 
@@ -450,11 +450,11 @@ def _animate_path_reveal(screen, grid, board_rect, panel_rect,
         dt = clock.tick(60)
         elapsed += dt
 
-        for event in visualize.event.get():
-            if event.type == visualize.QUIT:
-                visualize.quit(); sys.exit()
-            if event.type == visualize.KEYDOWN and event.key == visualize.K_ESCAPE:
-                visualize.quit(); sys.exit()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit(); sys.exit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                pygame.quit(); sys.exit()
 
         progress = min(1.0, elapsed / total_ms)
 
@@ -470,19 +470,19 @@ def _animate_path_reveal(screen, grid, board_rect, panel_rect,
             if segs:
                 points = [_cell_center(c, r, grid, board_rect) for c, r in segs]
                 if len(points) >= 2:
-                    visualize.draw.lines(screen, C_PATH_GLOW, False, points, width=14)
-                    visualize.draw.lines(screen, C_PATH,      False, points, width=7)
+                    pygame.draw.lines(screen, C_PATH_GLOW, False, points, width=14)
+                    pygame.draw.lines(screen, C_PATH,      False, points, width=7)
             if n_full < len(path) - 1 and partial > 0:
                 p0 = _cell_center(*path[n_full],     grid, board_rect)
                 p1 = _cell_center(*path[n_full + 1], grid, board_rect)
                 px = p0[0] + (p1[0] - p0[0]) * partial
                 py = p0[1] + (p1[1] - p0[1]) * partial
-                visualize.draw.line(screen, C_PATH_GLOW, p0, (px, py), width=14)
-                visualize.draw.line(screen, C_PATH,      p0, (px, py), width=7)
+                pygame.draw.line(screen, C_PATH_GLOW, p0, (px, py), width=14)
+                pygame.draw.line(screen, C_PATH,      p0, (px, py), width=7)
 
         _draw_panel(screen, panel_rect, state, source, target, net_name,
                     fonts, searching=False, final_path=path)
-        visualize.display.flip()
+        pygame.display.flip()
 
 
 def _show_failure(screen, grid, board_rect, panel_rect,
@@ -490,24 +490,24 @@ def _show_failure(screen, grid, board_rect, panel_rect,
     """If no path was found, show the exhausted search briefly."""
     for _ in range(60):
         clock.tick(60)
-        for event in visualize.event.get():
-            if event.type == visualize.QUIT:
-                visualize.quit(); sys.exit()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit(); sys.exit()
         _draw_background(screen, board_rect, panel_rect)
         _draw_grid(screen, grid, board_rect, state, source, target, path=None)
         _draw_panel(screen, panel_rect, state, source, target, net_name,
                     fonts, searching=False, final_path=None)
-        visualize.display.flip()
+        pygame.display.flip()
 
 
 def _hold_window(screen, clock):
     """Keep the window open until user closes or hits ESC."""
     while True:
         clock.tick(30)
-        for event in visualize.event.get():
-            if event.type == visualize.QUIT:
-                visualize.quit()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
                 return
-            if event.type == visualize.KEYDOWN and event.key == visualize.K_ESCAPE:
-                visualize.quit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                pygame.quit()
                 return
