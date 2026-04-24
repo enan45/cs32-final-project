@@ -15,10 +15,10 @@
 
 
 # # ### testing_lee.py
-from circuits import build_555_timer
-from lee      import find_path
+# from circuits import build_555_timer
+# from lee      import find_path
 
-grid, pads = build_555_timer()
+# grid, pads = build_555_timer()
 
 # # Route VCC: pin 8 to pin 4 (the two VCC pins on the chip)
 # source, target = pads['VCC'][0], pads['VCC'][1]
