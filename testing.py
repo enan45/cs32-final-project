@@ -54,7 +54,7 @@ grid, pads = build_555_timer()
 """Run the live PCB router visualization on the 555 timer circuit."""
 
 from circuits  import build_555_timer
-from pygame import visualize_route
+from visualize import visualize_route
 
 
 def main():
