@@ -48,14 +48,13 @@ def find_path(grid, source, target):
         for neighbor in neighbors:
           cell = grid.get(neighbor[0], neighbor[1])
 
-          if cell.state == Cell.PAD:
-            if neighbor not in allowed_pads:
+          if cell.state == Cell.PAD and neighbor not in allowed_pads:
               continue
 
-            if neighbor not in visited:
-                visited.add(neighbor)
-                came_from[neighbor] = current
-                frontier.append(neighbor)
+        if neighbor not in visited:
+            visited.add(neighbor)
+            came_from[neighbor] = current
+            frontier.append(neighbor)
 
     # no path found
     return None
