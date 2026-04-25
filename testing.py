@@ -1,17 +1,4 @@
 
-# from circuits import build_555_timer
-
-# grid, pads = build_555_timer()
-
-# # What are the neighbors of the source?
-# source = pads['VCC'][0]
-# print(f"Source: {source}")
-# print(f"Neighbors of source: {grid.neighbors(*source)}")
-
-# # What state is each pad at column 10?
-# for row in range(9, 13):
-#     cell = grid.get(10, row)
-#     print(f"Cell (10, {row}): state = {cell.state}")
 
 
 # # ### testing_lee.py
