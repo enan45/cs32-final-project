@@ -40,12 +40,11 @@ the correctness baseline for more advanced routers.
   traces from electrically shorting unrelated signals
 - ASCII visualization of the board before and after routing
 
-## What is left to do
-
+## to do
 - Multi-net routing: routing all 6 nets sequentially with each
   successful trace becoming an obstacle for later nets
 - A* with Manhattan-distance heuristic for faster search
 - Live Pygame visualization showing the wavefront expand in real time
-- Larger and denser test circuits (ATmega328P breakout, motor driver)
+- Larger and denser test circuits. I am thinking of(ATmega328P breakout, motor driver)
 - Two-layer routing with vias
 - Rip-up and reroute when a net c
