@@ -46,5 +46,5 @@ the correctness baseline for more advanced routers.
 - A* with Manhattan-distance heuristic for faster search
 - Live Pygame visualization showing the wavefront expand in real time
 - Larger and denser test circuits. I am thinking of(ATmega328P breakout, motor driver)
-- Two-layer routing with vias
 - Rip-up and reroute when a net c
+- Two-layer routing with vias (maybe) :)
