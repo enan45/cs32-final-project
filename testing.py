@@ -53,7 +53,6 @@ def main():
     source = pads[net][0]   # pin 2 (left side)
     target = pads[net][1]   # pin 6 (right side)
 
-    visualize_route(grid, source, target, net_name=net)
 
 
 if __name__ == '__main__':
