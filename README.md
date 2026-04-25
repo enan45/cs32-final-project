@@ -6,7 +6,7 @@ Given a board with components and a list of electrical nets that must be
 connected, the router finds an optimal path for each trace using Lee's
 classical maze-routing algorithm.
 
-This is the "FP Status" milestone for Harvard CS32. The current version
+The current version
 implements single-net routing on a hardcoded representation of a 555 timer
 oscillator circuit, with full ASCII visualization of the result.
 
