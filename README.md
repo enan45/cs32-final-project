@@ -13,7 +13,7 @@ oscillator circuit, with full ASCII visualization of the result.
 ## Background
 
 PCB routing is the problem of physically connecting electrical nets
-(groups of pins that must be electrically common) on a printed circuit
+(groups of pins that must be electrically connected) on a printed circuit
 board, given that traces cannot cross each other or pass through
 component bodies.
 
