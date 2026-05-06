@@ -185,10 +185,19 @@ python3 main.py
 **Important** pygame opens a graphical window for visualize.py which means it cannot
 run inside a remote development environment such as Github Codespaces
 To see live router animation, you need to run `main.py` locally
-You'll be prompted to choose a circuit and a routing mode. The
-single-net mode visualizes the BFS/A* wavefront for one net. The
+
+You'll be prompted in sequence for:
+
+1. **A circuit** — 555 timer, inverting op-amp, or L293D motor driver
+2. **An algorithm** — Lee (BFS, h=0) or A* (Manhattan heuristic)
+3. **A routing mode** — Simple (one net at a time) or Hardcore (Multinet in sequence)
+
+The single-net mode visualizes one search wavefront end-to-end. The
 multi-net mode routes every net in sequence with each net rendered in
-a different color.
+a different color. Running the same circuit twice — once with Lee and
+once with A* — gives a clear visual comparison of how many fewer cells
+the heuristic explores. The iteration and visited-cell counts in the
+side panel make the speedup measurable on every run.
 
 ### Compare Lee vs A*
 ```bash
@@ -227,7 +236,7 @@ cs32-final-project/
 ## What works and what doesn't
 
 ### Works
-- All three circuits load correctly and display in ASCII
+- All three circuits load correctly and display
 - Lee's algorithm finds shortest paths on every solvable single-net problem
 - A* with Manhattan heuristic finds paths of identical length, 3-5×
   faster on cells visited
@@ -237,7 +246,8 @@ pad as documented in Limitations)
   (VCC, VEE, VIN); GND, VIRTUAL, and VOUT fail because of the same
   chain-order limitation and because the chip body forces routes
   through narrow corridors that earlier nets have already taken
-- Live Pygame visualization for both single-net and multi-net modes
+- Live Pygame visualization for both single-net and multi-net modes,
+  with either Lee or A* as the underlying search
 - Other-net pads correctly treated as obstacles
 - Component bodies correctly treated as obstacles
 

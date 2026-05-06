@@ -179,5 +179,6 @@ def find_path_stepped(grid, source, target):
 
 """
 A generator is a function that can pause and continue later. In this project, that lets me run the BFS 
-one step at a time and show each step in Pygame. Without this pygame would not run as I envision it.
+one step at a time and show each step in Pygame. Without this pygame would not run as I envision it. This is one
+of the things I appreciate Learning in this Project.
 """

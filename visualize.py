@@ -6,7 +6,8 @@ import math
 import pygame
 
 from grid import Cell
-from lee import find_path_stepped
+from lee import find_path_stepped as lee_stepped
+from astar import find_path_stepped as astar_stepped
 
 
 ########## colors RGB numbers. googled this by sampling from procreate
@@ -51,7 +52,7 @@ PATH_DRAW_MS    = 80       # ms per cell when drawing the final path
 ##### Main entry point ─
 
 def visualize_route(grid, source, target, net_name="NET",
-                    title="PCB Auto-Router"):
+                    title="PCB Auto-Router", algorithm='astar'):
     
     """
     Open a Pygame window and animate a single-net route live.
@@ -99,7 +100,11 @@ def visualize_route(grid, source, target, net_name="NET",
     The visualizer repeatedly advances this generator and draws each intermediate search state.
     """
 
-    stepper = find_path_stepped(grid, source, target) # generator object
+    if algorithm == 'astar': # generator object
+        stepper = astar_stepped(grid, source, target)
+    else:
+        stepper = lee_stepped(grid, source, target) 
+
     state   = None #holds latest search snapshot from the generator
     path    = None # holds final path once search is done
     paused  = False #I added so that I can pause if I want using a key defined- space
@@ -161,7 +166,7 @@ def visualize_route(grid, source, target, net_name="NET",
         _draw_grid(screen, grid, board_rect, state, source, target, path=None)
 
         _draw_panel(screen, panel_rect, state, source, target, net_name,
-                    fonts, searching=True, paused=paused)
+                    fonts, algorithm=algorithm, searching=True, paused=paused)
         pygame.display.flip()
     
     ### reveal of final path
@@ -363,9 +368,10 @@ def _draw_path(screen, grid, board_rect, path, progress=1.0):
         pygame.draw.line(screen, C_PATH, p0, (px, py), width=7)
 
 
-def _draw_panel(screen, panel_rect, state, source, target, net_name, fonts,
+def _draw_panel(screen, panel_rect, state, source, target, net_name, fonts, algorithm='A*',
                 searching=True, paused=False, final_path=None):
     """Draw the info panel on the right."""
+
     x = panel_rect.x + 16
     y = panel_rect.y + 16
     
@@ -373,7 +379,7 @@ def _draw_panel(screen, panel_rect, state, source, target, net_name, fonts,
     title = fonts['big'].render("PCB AUTO-ROUTER", True, C_TEXT)
     screen.blit(title, (x, y))
     y += 32
-    subtitle = fonts['small'].render("Lee's algorithm · h=0 A*", True, C_TEXT_DIM)
+    subtitle = fonts['small'].render(algorithm, True, C_TEXT_DIM)
     screen.blit(subtitle, (x, y))
     y += 30
     
@@ -471,7 +477,7 @@ def _legend_row(screen, fonts, x, y, color, label):
 
 # End-of-search animations
 def _animate_path_reveal(screen, grid, board_rect, panel_rect,
-                         state, source, target, net_name, path, fonts, clock):
+                         state, source, target, net_name, path, fonts, clock, algorithm='A*'):
     """Dramatic reveal: the path draws itself from source to target."""
     total_ms = PATH_DRAW_MS * max(1, len(path) - 1)
     elapsed  = 0
@@ -511,12 +517,12 @@ def _animate_path_reveal(screen, grid, board_rect, panel_rect,
                 pygame.draw.line(screen, C_PATH,      p0, (px, py), width=7)
         
         _draw_panel(screen, panel_rect, state, source, target, net_name,
-                    fonts, searching=False, final_path=path)
+                    fonts, algorithm=algorithm, searching=False, final_path=path)
         pygame.display.flip()
 
 
 def _show_failure(screen, grid, board_rect, panel_rect,
-                  state, source, target, net_name, fonts, clock):
+                  state, source, target, net_name, fonts, clock,algorithm='A*' ):
     """If no path was found, show the exhausted search briefly."""
     for _ in range(60):
         clock.tick(60)
@@ -526,7 +532,7 @@ def _show_failure(screen, grid, board_rect, panel_rect,
         _draw_background(screen, board_rect, panel_rect)
         _draw_grid(screen, grid, board_rect, state, source, target, path=None)
         _draw_panel(screen, panel_rect, state, source, target, net_name,
-                    fonts, searching=False, final_path=None)
+                    fonts, algorithm=algorithm, searching=False, final_path=None)
         pygame.display.flip()
 
 

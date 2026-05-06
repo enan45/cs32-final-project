@@ -4,7 +4,8 @@
 import pygame
 from grid import Cell
 from astar import find_path
-from lee import find_path_stepped
+from lee import find_path_stepped as lee_stepped
+from astar import find_path_stepped as astar_stepped
 from visualize import ( _draw_background, _draw_grid, _draw_panel, _load_font, _hold_window, _animate_path_reveal, 
                        CELL_SIZE, MARGIN, PANEL_WIDTH,C_PATH, C_PATH_GLOW, FRAME_DELAY_MS, STEPS_PER_FRAME,
 )
@@ -21,7 +22,7 @@ NET_COLORS = [
 ]
 
 
-def visualize_multinet(grid, netlist, order=None, title="PCB Auto-Router — Multi-Net"):
+def visualize_multinet(grid, netlist, order=None, title="PCB Auto-Router — Multi-Net", algorithm='astar'):
     """Open one Pygame window and animate every net in the netlist."""
     pygame.init()
     pygame.display.set_caption(title)
@@ -64,7 +65,10 @@ def visualize_multinet(grid, netlist, order=None, title="PCB Auto-Router — Mul
             source = pads[i]
             target = pads[i + 1]
             
-            stepper = find_path_stepped(grid, source, target)
+            if algorithm == 'astar': # generator object
+                stepper = astar_stepped(grid, source, target)
+            else:
+                stepper = lee_stepped(grid, source, target) 
             state = None
             path = None
             search_done = False

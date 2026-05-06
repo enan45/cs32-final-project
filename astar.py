@@ -104,3 +104,100 @@ def reconstruct_path(came_from, target): # same as lee
         
     path.reverse()
     return path
+
+
+###pygame
+def find_path_stepped(grid, source, target): #Same Generator function as Lee
+    """
+    Step-by-step A* for visualization. 
+    Same interface as lee.find_path_stepped
+    """
+
+    allowed_pads = {source, target}  # same idea as above
+
+    # Normal A* setup
+    # Unlike Lee, A* uses a priority queue instead of a FIFO queue.
+    frontier = []
+
+    start_h = manhattan(source, target)
+    start_g = 0
+    start_f = start_g + start_h
+
+    heapq.heappush(frontier, (start_f, start_g, source))
+
+    # Best known cost from source to each cell
+    best_g = {source: 0}
+
+    # Same idea as Lee: store parent pointers so we can rebuild the final path
+    came_from = {source: None}
+    iteration = 0
+
+    while frontier:
+        iteration += 1
+        f_score, g_score, current = heapq.heappop(frontier)
+
+        # If this heap entry is outdated, skip it
+        # This can happen because the same cell may be pushed into the heap multiple times
+        if g_score > best_g[current]:
+            continue
+
+        # Yield to pause and hand the Pygame visualizer a snapshot of the current search state
+        # The dictionary makes it easier to read the current cell, frontier, and visited cells
+        yield {
+            'current':   current,
+            'frontier':  [item[2] for item in frontier],
+            'visited':   set(best_g.keys()),
+            'came_from': dict(came_from),
+            'done':      False,
+            'path':      None,
+            'iteration': iteration,
+        }
+
+        # If the search reaches the target, construct the final path,
+        # then yield again to tell the visualizer the search is finished
+        if current == target:
+            path = reconstruct_path(came_from, target)
+
+            yield {
+                'current':   current,
+                'frontier':  [item[2] for item in frontier],
+                'visited':   set(best_g.keys()),
+                'came_from': dict(came_from),
+                'done':      True,
+                'path':      path,
+                'iteration': iteration,
+            }
+            return
+
+        # Expand neighbors, same general structure as Lee
+        col, row = current
+        for neighbor in grid.neighbors(col, row):
+            cell = grid.get(neighbor[0], neighbor[1])
+
+            if cell.state == Cell.PAD and neighbor not in allowed_pads:
+                continue
+
+            # In A*, the new real cost is current g-score plus one step
+            new_g = g_score + 1
+
+            # Only keep this path if it is better than the best one seen before
+            if new_g < best_g.get(neighbor, float('inf')):
+                best_g[neighbor] = new_g
+                came_from[neighbor] = current
+
+                new_h = manhattan(neighbor, target)
+                new_f = new_g + new_h
+
+                heapq.heappush(frontier, (new_f, new_g, neighbor))
+
+    # Frontier exhausted without finding target. Final yield.
+    # Search is done and no path was found.
+    yield {
+        'current':   None,
+        'frontier':  [],
+        'visited':   set(best_g.keys()),
+        'came_from': dict(came_from),
+        'done':      True,
+        'path':      None,
+        'iteration': iteration,
+    }

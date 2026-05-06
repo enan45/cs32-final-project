@@ -42,11 +42,30 @@ def main():
 
         print("Invalid circuit choice.")
         return
+    
 
+ # Algorithm choice
+ 
+    print()
+    print("Choose an algorithm:")
+    print("1 - Lee (BFS, h=0)")
+    print("2 - A* (Manhattan heuristic)")
+
+    algo_choice = input("Which algorithm? ").strip()
+
+    if algo_choice == "1":
+        algorithm = "Lee"
+    elif algo_choice == "2":
+        algorithm = "A*"
+    else:
+        print("Invalid algorithm choice.")
+        return
     print()
     print("Please Choose a mode:")
     print("1 - Simple")
     print("2 -hardcore")
+
+##Mode choice
 
     mode_choice = input("would you like simple or hardcore: ").strip()
 
