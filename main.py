@@ -56,7 +56,7 @@ def main():
     if algo_choice == "1":
         algorithm = "Lee"
     elif algo_choice == "2":
-        algorithm = "A*"
+        algorithm = "astar"
     else:
         print("Invalid algorithm choice.")
         return
@@ -99,6 +99,7 @@ def main():
             target,
             net_name=chosen_net,
             title="PCB Auto-Router - " + circuit_name
+            algorithm=algorithm #This was the bug in my video, This parameter that is passed to visualize route got deleted
         )
 
     elif mode_choice == "2":
@@ -108,7 +109,9 @@ def main():
             netlist,
             order=order,
             title="PCB Auto-Router - " + circuit_name
+            algorithm=algorithm
         )
+
 
     else:
         print("Invalid mode choice.")

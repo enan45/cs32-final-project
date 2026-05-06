@@ -101,7 +101,7 @@ def visualize_multinet(grid, netlist, order=None, title="PCB Auto-Router — Mul
                 _draw_completed_traces(screen, grid, board_rect, completed_traces)
                 _draw_grid(screen, grid, board_rect, state, source, target, path=None)
                 _draw_panel(screen, panel_rect, state, source, target,
-                           net_name, fonts, searching=True)
+                           net_name, fonts, algorithm=algorithm, searching=True)
                 pygame.display.flip()
             
             if path is None:
@@ -122,7 +122,7 @@ def visualize_multinet(grid, netlist, order=None, title="PCB Auto-Router — Mul
                 _draw_completed_traces(screen, grid, board_rect, completed_traces)
                 _draw_grid(screen, grid, board_rect, None, source, target, path=None)
                 _draw_panel(screen, panel_rect, state, source, target,
-                           net_name, fonts, searching=False, final_path=path)
+                           net_name, fonts, algorithm=algorithm, searching=False, final_path=path)
                 pygame.display.flip()
     
     print("\nAll nets attempted. Final board ready.")
