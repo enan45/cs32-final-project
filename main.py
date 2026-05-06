@@ -54,7 +54,7 @@ def main():
     algo_choice = input("Which algorithm? ").strip()
 
     if algo_choice == "1":
-        algorithm = "Lee"
+        algorithm = "lee"
     elif algo_choice == "2":
         algorithm = "astar"
     else:
@@ -98,7 +98,7 @@ def main():
             source,
             target,
             net_name=chosen_net,
-            title="PCB Auto-Router - " + circuit_name
+            title="PCB Auto-Router - " + circuit_name,
             algorithm=algorithm #This was the bug in my video, This parameter that is passed to visualize route got deleted
         )
 
@@ -108,7 +108,7 @@ def main():
             grid,
             netlist,
             order=order,
-            title="PCB Auto-Router - " + circuit_name
+            title="PCB Auto-Router - " + circuit_name,
             algorithm=algorithm
         )
 
