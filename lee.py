@@ -10,7 +10,8 @@ from collections import deque
 from grid import Grid, Cell
 
 def find_path(grid, source, target):
-    """Find the shortest path from source to target using BFS.
+    """
+    Find the shortest path from source to target using BFS.
 
     Args:
         grid: Grid object from grid.py
@@ -33,13 +34,19 @@ def find_path(grid, source, target):
 
     # For each visited cell, which cell did we reach it from?
     came_from = {source: None}
+    iterations = 0
 
     while frontier:
+        iterations += 1
         current = frontier.popleft()
 
         # stop if we reached the target
         if current == target:
-            return reconstruct_path(came_from, target)
+            stats = {
+                'iterations': iterations, 
+                'visited': len(visited)
+            }
+            return reconstruct_path(came_from, target), stats
 
         col, row = current
         neighbors = grid.neighbors(col, row)
@@ -56,8 +63,13 @@ def find_path(grid, source, target):
             came_from[neighbor] = current
             frontier.append(neighbor)
 
-    # no path found
-    return None
+    # no path found 
+    stats = {
+        'iterations': iterations, 
+        'visited': len(visited)
+    } #Use stats when comparing lee with astar
+
+    return None, stats
 
 
 def reconstruct_path(came_from, target):
@@ -74,9 +86,12 @@ def reconstruct_path(came_from, target):
     path.reverse()
     return path
 
-####pygame
+###pygame
 def find_path_stepped(grid, source, target):
-    """Generator version of find_path for live visualization.
+    """ 
+    Step by step Lee search for visualization. I utilize generators which is something new
+    I learnt during this project! instead of showing final path as find path would, I show the search
+    as it happnes
 
     At each step, yields a dict describing the current state:
         {
@@ -91,10 +106,16 @@ def find_path_stepped(grid, source, target):
 
     Consume with a for loop; the final yield has done=True and path set.
     """
-    allowed_pads = {source, target}
 
-    frontier  = deque([source])
-    visited   = {source}
+    allowed_pads = {source, target} #same as above
+
+    #normal BFS setup as above too
+    frontier  = deque()
+    frontier.append(source)
+
+    visited   = set()
+    visited.add(source)
+
     came_from = {source: None}
     iteration = 0
 
@@ -102,7 +123,8 @@ def find_path_stepped(grid, source, target):
         iteration += 1
         current = frontier.popleft()
 
-        # Yield state BEFORE checking for target so animation shows the hit
+        # yield to paused and hand pygame visualizer snapshot of current search state. Generator implementation
+        #builds a dictionary for ease of reading stuff and to separate current, frontier and visited.
         yield {
             'current':   current,
             'frontier':  list(frontier),
@@ -113,8 +135,11 @@ def find_path_stepped(grid, source, target):
             'iteration': iteration,
         }
 
+        #if search reaches target, I contstruct final path, then yield again a snapshot telling visualizer search is finished
+        #same dictionary, same code from BFS
         if current == target:
             path = reconstruct_path(came_from, target)
+
             yield {
                 'current':   current,
                 'frontier':  list(frontier),
@@ -126,16 +151,21 @@ def find_path_stepped(grid, source, target):
             }
             return
 
+        #same As BFS
         col, row = current
         for neighbor in grid.neighbors(col, row):
-            if grid.get(*neighbor).state == Cell.PAD and neighbor not in allowed_pads:
-                continue
-            if neighbor not in visited:
+             cell = grid.get(neighbor[0], neighbor[1])
+
+             if cell.state == Cell.PAD and neighbor not in allowed_pads:
+                 continue
+             
+             if neighbor not in visited:
                 visited.add(neighbor)
                 came_from[neighbor] = current
                 frontier.append(neighbor)
 
-    # Frontier exhausted without finding target
+    # Frontier exhausted without finding target. final yield
+    #frontier empties before reaching target, yield final state. search is done. no path found
     yield {
         'current':   None,
         'frontier':  [],
@@ -145,3 +175,9 @@ def find_path_stepped(grid, source, target):
         'path':      None,
         'iteration': iteration,
     }
+
+
+"""
+A generator is a function that can pause and continue later. In this project, that lets me run the BFS 
+one step at a time and show each step in Pygame. Without this pygame would not run as I envision it.
+"""

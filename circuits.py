@@ -84,3 +84,168 @@ def build_555_timer():
     }
 
     return grid, pads
+
+
+        
+    #  Pin 1 (V+ output)
+    #  Pin 2 (-) input — virtual ground node
+    #  Pin 3 (+) input — tied to ground/VREF
+    #  Pin 4 V-
+    #  Pin 8 V+
+    
+    # Nets (6):
+    #  VCC      — pin 8, VCC header pad
+    #  VEE      — pin 4, VEE header pad  
+    #  GND      — pin 3, ground header
+    #  VIN      — Rin input lead, VIN header
+    #  VIRTUAL  — pin 2, Rin output, Rfb left lead
+    #  VOUT     — pin 1, Rfb right lead, VOUT header
+
+def build_inverting_opamp():
+    """
+    Inverting op-amp circuit: TL072 with input resistor and feedback resistor.
+
+    """
+    grid = Grid(cols=20, rows=15)
+    
+    # TL072 chip body — same DIP-8 layout as the 555
+    chip_left,  chip_right = 8, 10
+    chip_bot,   chip_top   = 5, 8
+    for c in range(chip_left, chip_right + 1):
+        for r in range(chip_bot, chip_top + 1):
+            grid.block(c, r)
+    
+    # Chip pins (same DIP-8 pinout as 555)
+    pin1 = (chip_left - 1, chip_bot)      # VOUT
+    pin2 = (chip_left - 1, chip_bot + 1)  # (-) input — virtual ground
+    pin3 = (chip_left - 1, chip_bot + 2)  # (+) input
+    pin4 = (chip_left - 1, chip_top)      # V-
+    pin8 = (chip_right + 1, chip_bot)     # V+
+    
+    # Rin — input resistor, vertical, to the left of the chip
+    grid.block(4, 7)
+    rin_top    = (4, 8)
+    rin_bottom = (4, 6)
+    
+    # Rfb — feedback resistor, horizontal, above the chip
+    grid.block(9, 11)
+    rfb_left  = (8, 11)
+    rfb_right = (10, 11)
+    
+    # I/O header pads on the right edge
+    vin_header  = (15, 8)
+    vout_header = (15, 6)
+    vcc_header  = (15, 12)
+    vee_header  = (15, 4)
+    gnd_header  = (15, 2)
+    
+    # Place all pads
+    all_pads = [pin1, pin2, pin3, pin4, pin8,
+                rin_top, rin_bottom, rfb_left, rfb_right,
+                vin_header, vout_header, vcc_header, vee_header, gnd_header]
+    for col, row in all_pads:
+        grid.place_pad(col, row)
+    
+    netlist = {
+        'VCC':     [pin8, vcc_header],
+        'VEE':     [pin4, vee_header],
+        'GND':     [pin3, gnd_header],
+        'VIN':     [vin_header, rin_top],
+        'VIRTUAL': [pin2, rin_bottom, rfb_left],
+        'VOUT':    [pin1, rfb_right, vout_header],
+    }
+    
+    return grid, netlist
+
+def build_l293d_motor_driver():
+    """L293D dual H-bridge motor driver, generously spaced.
+    
+    DIP-16 with 8 pins per side. This version places components with
+    enough breathing room that nets have multiple legal escape routes
+    around the chip.
+    """
+    grid = Grid(cols=40, rows=26)
+    
+    # L293D chip body in the middle: 6 cols wide, 12 rows tall
+    chip_left,  chip_right = 17, 22
+    chip_bot,   chip_top   = 7,  18
+    for c in range(chip_left, chip_right + 1):
+        for r in range(chip_bot, chip_top + 1):
+            grid.block(c, r)
+    
+    # Left side pins (1-8, top to bottom)
+    pin1  = (chip_left - 1, chip_top)         # EN1,2
+    pin2  = (chip_left - 1, chip_top - 1)     # 1A
+    pin3  = (chip_left - 1, chip_top - 3)     # 1Y motor output
+    pin4  = (chip_left - 1, chip_top - 5)     # GND heatsink
+    pin5  = (chip_left - 1, chip_top - 7)     # GND heatsink
+    pin6  = (chip_left - 1, chip_top - 9)     # 2Y motor output
+    pin7  = (chip_left - 1, chip_top - 10)    # 2A
+    pin8  = (chip_left - 1, chip_bot)         # VCC2 motor power
+    
+    # Right side pins (9-16, bottom to top)
+    pin9  = (chip_right + 1, chip_bot)        # EN3,4
+    pin10 = (chip_right + 1, chip_bot + 1)    # 3A
+    pin11 = (chip_right + 1, chip_bot + 3)    # 3Y motor output
+    pin12 = (chip_right + 1, chip_bot + 5)    # GND heatsink
+    pin13 = (chip_right + 1, chip_bot + 7)    # GND heatsink
+    pin14 = (chip_right + 1, chip_bot + 9)    # 4Y motor output
+    pin15 = (chip_right + 1, chip_bot + 10)   # 4A
+    pin16 = (chip_right + 1, chip_top)        # VCC1 logic power
+    
+    # Decoupling caps, well above and below the chip
+    grid.block(10, 23)
+    c1_top    = (10, 24)
+    c1_bottom = (10, 22)
+    
+    grid.block(10, 3)
+    c2_top    = (10, 4)
+    c2_bottom = (10, 2)
+    
+    # Power and signal headers on the far right edge
+    vcc1_pad = (37, 24)
+    vcc2_pad = (37, 2)
+    gnd_pad  = (37, 13)
+    
+    # Motor output headers (also right side, well above/below the chip)
+    motor1_a_pad = (37, 19)
+    motor1_b_pad = (37, 16)
+    motor2_a_pad = (37, 10)
+    motor2_b_pad = (37, 7)
+    
+    # Signal input headers on the far left
+    en1_pad = (2, 24)
+    en2_pad = (2, 2)
+    in1_pad = (2, 22)
+    in2_pad = (2, 18)
+    in3_pad = (2, 8)
+    in4_pad = (2, 5)
+    
+    all_pads = [
+        pin1, pin2, pin3, pin4, pin5, pin6, pin7, pin8,
+        pin9, pin10, pin11, pin12, pin13, pin14, pin15, pin16,
+        c1_top, c1_bottom, c2_top, c2_bottom,
+        vcc1_pad, vcc2_pad, gnd_pad,
+        motor1_a_pad, motor1_b_pad, motor2_a_pad, motor2_b_pad,
+        en1_pad, en2_pad, in1_pad, in2_pad, in3_pad, in4_pad,
+    ]
+    for col, row in all_pads:
+        grid.place_pad(col, row)
+    
+    netlist = {
+        'VCC1':     [pin16, c1_top, vcc1_pad],
+        'VCC2':     [pin8,  c2_top, vcc2_pad],
+        'GND':      [pin4, pin5, pin12, pin13, c1_bottom, c2_bottom, gnd_pad],
+        'EN1':      [pin1, en1_pad],
+        'EN2':      [pin9, en2_pad],
+        'IN1':      [pin2, in1_pad],
+        'IN2':      [pin7, in2_pad],
+        'IN3':      [pin10, in3_pad],
+        'IN4':      [pin15, in4_pad],
+        'MOTOR1_A': [pin3, motor1_a_pad],
+        'MOTOR1_B': [pin6, motor1_b_pad],
+        'MOTOR2_A': [pin11, motor2_a_pad],
+        'MOTOR2_B': [pin14, motor2_b_pad],
+    }
+    
+    return grid, netlist

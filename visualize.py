@@ -1,18 +1,3 @@
-# initialize pygame window
-# load the circuit (build_555_timer)
-# pick source and target from pads dict
-#from youtube video on pygame....
-# create the stepped generator ----> currently reading on generator protocols...
-# for each (visited, frontier, came_from) yielded by the generator:
-#     handle window events (close button etc.)
-#     clear window and redraw all cells with current colors
-#     display current iteration count
-#     pygame.display.flip()
-#     small delay for animation speed
-# when generator returns the final path:
-#     draw the path in purple on top
-#     keep window open until user closes it
-
 ### visualize.py
 """Live Pygame visualization of PCB routing with A* / Lee's algorithm."""
 
@@ -20,12 +5,12 @@ import sys
 import math
 import pygame
 
-from grid     import Cell
-from lee      import find_path_stepped
+from grid import Cell
+from lee import find_path_stepped
 
 
-# ─── Visual theme ──────────────────────────────────────────────────────────
-# Colors chosen to evoke a real PCB: dark green substrate, copper traces,
+########## colors RGB numbers. googled this by sampling from procreate
+# looks like actual PCB dark green substrate, copper traces,
 # warm amber pads. Everything on a dark palette so the routing colors pop.
 
 C_BG          = (10,  20,  18)     # near-black background outside board
@@ -53,7 +38,7 @@ C_PANEL_BG    = (20,  30,  28)
 C_PANEL_EDGE  = (80, 120, 100)
 
 
-# ─── Layout ────────────────────────────────────────────────────────────────
+###### Layout 
 
 CELL_SIZE       = 30       # pixels per grid cell
 MARGIN          = 40       # board padding from window edge
@@ -63,109 +48,149 @@ FRAME_DELAY_MS  = 30       # milliseconds between frames
 PATH_DRAW_MS    = 80       # ms per cell when drawing the final path
 
 
-# ─── Main entry point ──────────────────────────────────────────────────────
+##### Main entry point ─
 
 def visualize_route(grid, source, target, net_name="NET",
-                    title="PCB Auto-Router — Lee's Algorithm"):
-    """Open a Pygame window and animate a single-net route live."""
-    pygame.init()
-    pygame.display.set_caption(title)
+                    title="PCB Auto-Router"):
+    
+    """
+    Open a Pygame window and animate a single-net route live.
+    """
 
-    board_w = grid.cols * CELL_SIZE
+    pygame.init() #intialize pygame
+    pygame.display.set_caption(title)
+    
+    #set window tile depneds on the size of grid and CELL_SIZE Cosntand which i can change 
+    #board size converts to pixels
+    board_w = grid.cols * CELL_SIZE 
     board_h = grid.rows * CELL_SIZE
+    
+    #actual window size, need board, margins, and panel with descriptions of my choice, height just has margins
     win_w   = board_w + 2 * MARGIN + PANEL_WIDTH
     win_h   = board_h + 2 * MARGIN
-
+    
+    #create the window
     screen = pygame.display.set_mode((win_w, win_h))
+    #create clock to control frame rate. important in pygame to regulate speed
     clock  = pygame.time.Clock()
-
-    # Font setup — try nice fonts, fall back gracefully
+    
+    # Font setup UI. load fonts in advance so as not to load them each time I want to use them in the sidepanel
     font_big    = _load_font(24, bold=True)
     font_med    = _load_font(18)
     font_small  = _load_font(14)
     font_mono   = _load_font(13, mono=True)
+    
+    #create dictionary for easy access of the fonts
+    fonts = {
+        'big': font_big, 
+        'med': font_med,
+        'small': font_small, 
+        'mono': font_mono
+    }
+    
 
-    fonts = {'big': font_big, 'med': font_med,
-             'small': font_small, 'mono': font_mono}
-
+    #define rectactungular areas for board and side panel
     board_rect = pygame.Rect(MARGIN, MARGIN, board_w, board_h)
     panel_rect = pygame.Rect(board_w + 2*MARGIN, MARGIN, PANEL_WIDTH, board_h)
+    
+    # Generator setup. links algo and visualization
 
-    # Run the generator through the search
-    stepper = find_path_stepped(grid, source, target)
-    state   = None
-    path    = None
-    paused  = False
+    """
+    The visualizer repeatedly advances this generator and draws each intermediate search state.
+    """
 
-    # Phase 1 — live search animation
-    running = True
-    search_done = False
-    step_accumulator = 0.0
+    stepper = find_path_stepped(grid, source, target) # generator object
+    state   = None #holds latest search snapshot from the generator
+    path    = None # holds final path once search is done
+    paused  = False #I added so that I can pause if I want using a key defined- space
+    
 
-    while running and not search_done:
-        dt = clock.tick(60)
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+    #### Animation Control Variables
+    running = True   # is the window still open?
+    search_done = False  # has routing finshed?
+    step_accumulator = 0.0  #slow down. added this after initial debugs. Python runs so fast you cant see animation
+    
+    ####MAIN LOOP
+    while running and search_done == False: #routing not finished yet. Running is True when window is open
+        dt = clock.tick(60) #same as calculta delta time, returns no. of ms since last frame
+        
+        ## INPUTS
+        for event in pygame.event.get(): #chech everything user has done since last frame like inputs, closing winder etc.
+
+            if event.type == pygame.QUIT: #quite visulizer if user closes window
                 pygame.quit()
                 return
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    paused = not paused
-                if event.key == pygame.K_ESCAPE:
+            
+            if event.type == pygame.KEYDOWN:  #keyboard inputs
+
+                if event.key == pygame.K_SPACE:# If user presees spacebar change paused to opposite of what it was before
+                    if paused: 
+                        paused = False
+                    else:
+                        paused = True
+
+                if event.key == pygame.K_ESCAPE: #if user preses escape, quit visualizer
                     pygame.quit()
                     return
+        
 
-        # Advance the BFS by some steps per frame
-        if not paused:
-            step_accumulator += dt
-            if step_accumulator >= FRAME_DELAY_MS:
-                step_accumulator = 0.0
+        #### Advance the BFS by some steps per frame if not paused
+        if paused == False:
+            step_accumulator += dt #acts as a timer
+
+            if step_accumulator >= FRAME_DELAY_MS: #only advance after enough time has passed
+                step_accumulator = 0.0 #advance, reset timer to zero
+
                 for _ in range(STEPS_PER_FRAME):
                     try:
                         state = next(stepper)
-                        if state['done']:
+
+                        if state['done']: #if sarch is finished, save final path and stop stepping
                             path = state['path']
                             search_done = True
                             break
+                        
                     except StopIteration:
                         search_done = True
                         break
-
-        # Draw everything
+        
+        # Draw everything from background first moving up
         _draw_background(screen, board_rect, panel_rect)
-        if state is not None:
-            _draw_grid(screen, grid, board_rect, state, source, target, path=None)
-        else:
-            _draw_grid(screen, grid, board_rect, None, source, target, path=None)
+
+        _draw_grid(screen, grid, board_rect, state, source, target, path=None)
+
         _draw_panel(screen, panel_rect, state, source, target, net_name,
                     fonts, searching=True, paused=paused)
         pygame.display.flip()
-
-    # Phase 2 — dramatic reveal of final path
+    
+    ### reveal of final path
     if path is not None:
         _animate_path_reveal(screen, grid, board_rect, panel_rect,
                              state, source, target, net_name, path, fonts, clock)
     else:
         _show_failure(screen, grid, board_rect, panel_rect,
                       state, source, target, net_name, fonts, clock)
-
-    # Phase 3 — hold until user closes window
+    
+    # ###hold until user closes window
     _hold_window(screen, clock)
 
 
-# ─── Drawing helpers ───────────────────────────────────────────────────────
+##### Drawing helpers 
 
-def _load_font(size, bold=False, mono=False):
-    """Try a few nice fonts, fall back to the default."""
+def _load_font(size, bold=False, mono=False):  #incase ineed to choose fonts for UI
+
     candidates = []
-    if mono:
+
+    if mono: #mono spaces fonts
         candidates = ['JetBrains Mono', 'Fira Code', 'Menlo', 'Consolas',
                       'DejaVu Sans Mono', 'Courier New']
     else:
         candidates = ['SF Pro Display', 'Inter', 'Segoe UI', 'Helvetica Neue',
                       'DejaVu Sans', 'Arial']
-    for name in candidates:
+        
+    #suggested edit by claude AI, to make visualizer more robust by cheking if candidate fonts work else use pygames default
+    for name in candidates: 
         try:
             return pygame.font.SysFont(name, size, bold=bold)
         except Exception:
@@ -174,14 +199,16 @@ def _load_font(size, bold=False, mono=False):
 
 
 def _cell_to_pixel(col, row, grid, board_rect):
-    """Grid coordinate → top-left pixel of that cell.
-    Row 0 is at the bottom so we flip y."""
+    """
+    Grid coordinate ---> top-left pixel of that cell.
+    Row 0 is at the bottom so we flip y.
+    """
     px = board_rect.x + col * CELL_SIZE
     py = board_rect.y + (grid.rows - 1 - row) * CELL_SIZE
-    return px, py
+    return px, py #tuples
 
 
-def _cell_center(col, row, grid, board_rect):
+def _cell_center(col, row, grid, board_rect): #  helper returns the center of a cell instead of the top-left corner. essential for circles dots line paths
     px, py = _cell_to_pixel(col, row, grid, board_rect)
     return px + CELL_SIZE // 2, py + CELL_SIZE // 2
 
@@ -198,17 +225,22 @@ def _draw_background(screen, board_rect, panel_rect):
 
 def _draw_grid(screen, grid, board_rect, state, source, target, path=None):
     """Draw all cells with colors reflecting their role in the search."""
-    visited  = state['visited']  if state else set()
-    frontier = set(state['frontier']) if state else set()
-    current  = state['current']  if state else None
-
+    if state is None:
+        visited = set()
+        frontier= set()
+        current = None
+    else:
+        visited = state["visited"]
+        frontier = set(state["frontier"])
+        current = state["current"]
+    
     # Pass 1 — dim background: visited and frontier
     for row in range(grid.rows):
         for col in range(grid.cols):
             cell = grid.get(col, row)
             px, py = _cell_to_pixel(col, row, grid, board_rect)
             rect = pygame.Rect(px, py, CELL_SIZE, CELL_SIZE)
-
+            
             if cell.state == Cell.BLOCKED:
                 _draw_component(screen, rect)
             elif (col, row) in visited and (col, row) != source and (col, row) != target:
@@ -216,7 +248,7 @@ def _draw_grid(screen, grid, board_rect, state, source, target, path=None):
             elif (col, row) in frontier:
                 _draw_frontier(screen, rect)
             # else: free / pad — background stays green, we'll overlay pads next
-
+    
     # Pass 2 — grid dots on free cells
     for row in range(grid.rows):
         for col in range(grid.cols):
@@ -226,11 +258,11 @@ def _draw_grid(screen, grid, board_rect, state, source, target, path=None):
             if cell.state in (Cell.FREE, Cell.PAD):
                 cx, cy = _cell_center(col, row, grid, board_rect)
                 pygame.draw.circle(screen, C_GRID_DOT, (cx, cy), 1)
-
+    
     # Pass 3 — the final path (if we have one)
     if path is not None:
         _draw_path(screen, grid, board_rect, path)
-
+    
     # Pass 4 — pads on top of everything so they stay visible
     for row in range(grid.rows):
         for col in range(grid.cols):
@@ -244,7 +276,7 @@ def _draw_grid(screen, grid, board_rect, state, source, target, path=None):
                     _draw_pad(screen, rect, C_TARGET, label='T')
                 else:
                     _draw_pad(screen, rect, C_PAD)
-
+    
     # Pass 5 — the currently-expanding cell gets a bright highlight
     if current is not None and current not in (source, target):
         px, py = _cell_to_pixel(*current, grid, board_rect)
@@ -274,7 +306,6 @@ def _draw_frontier(screen, rect):
     pygame.draw.rect(surf, (*C_FRONTIER, 200), inner, border_radius=3)
     screen.blit(surf, rect.topleft)
 
-
 def _draw_pad(screen, rect, color, label=None):
     """Draw a pad as a donut — copper ring with a drill hole."""
     cx, cy = rect.center
@@ -295,20 +326,20 @@ def _draw_pad(screen, rect, color, label=None):
 
 def _draw_path(screen, grid, board_rect, path, progress=1.0):
     """Draw the final routed trace.
-
+    
     progress: 0.0-1.0 fraction of the path to draw — used for animated reveal.
     """
     if len(path) < 2:
         return
-
+    
     # How many full segments to draw
     total_segs = len(path) - 1
     full_segs  = int(total_segs * progress)
     partial    = (total_segs * progress) - full_segs
-
+    
     # Build the list of points (cell centers)
     points = [_cell_center(c, r, grid, board_rect) for c, r in path]
-
+    
     # Draw glow layer first
     if full_segs >= 1:
         pygame.draw.lines(screen, C_PATH_GLOW, False,
@@ -319,7 +350,7 @@ def _draw_path(screen, grid, board_rect, path, progress=1.0):
         px = p0[0] + (p1[0] - p0[0]) * partial
         py = p0[1] + (p1[1] - p0[1]) * partial
         pygame.draw.line(screen, C_PATH_GLOW, p0, (px, py), width=14)
-
+    
     # Then the main trace on top
     if full_segs >= 1:
         pygame.draw.lines(screen, C_PATH, False,
@@ -337,7 +368,7 @@ def _draw_panel(screen, panel_rect, state, source, target, net_name, fonts,
     """Draw the info panel on the right."""
     x = panel_rect.x + 16
     y = panel_rect.y + 16
-
+    
     # Title
     title = fonts['big'].render("PCB AUTO-ROUTER", True, C_TEXT)
     screen.blit(title, (x, y))
@@ -345,42 +376,42 @@ def _draw_panel(screen, panel_rect, state, source, target, net_name, fonts,
     subtitle = fonts['small'].render("Lee's algorithm · h=0 A*", True, C_TEXT_DIM)
     screen.blit(subtitle, (x, y))
     y += 30
-
+    
     # Divider
     pygame.draw.line(screen, C_PANEL_EDGE,
                      (x, y), (panel_rect.right - 16, y))
     y += 16
-
+    
     # Net info
     _panel_label(screen, fonts, x, y, "NET")
     y += 18
     net_text = fonts['med'].render(net_name, True, C_SOURCE)
     screen.blit(net_text, (x, y))
     y += 28
-
+    
     _panel_kv(screen, fonts, x, y, "Source", f"{source}")
     y += 20
     _panel_kv(screen, fonts, x, y, "Target", f"{target}")
     y += 28
-
+    
     # Stats
     pygame.draw.line(screen, C_PANEL_EDGE,
                      (x, y), (panel_rect.right - 16, y))
     y += 16
     _panel_label(screen, fonts, x, y, "SEARCH")
     y += 18
-
+    
     iter_count = state['iteration'] if state else 0
     visited_n  = len(state['visited']) if state else 0
     frontier_n = len(state['frontier']) if state else 0
-
+    
     _panel_kv(screen, fonts, x, y, "Iterations", f"{iter_count}")
     y += 20
     _panel_kv(screen, fonts, x, y, "Visited",    f"{visited_n}")
     y += 20
     _panel_kv(screen, fonts, x, y, "Frontier",   f"{frontier_n}")
     y += 28
-
+    
     # Status
     pygame.draw.line(screen, C_PANEL_EDGE,
                      (x, y), (panel_rect.right - 16, y))
@@ -398,11 +429,11 @@ def _draw_panel(screen, panel_rect, state, source, target, net_name, fonts,
     st_surf = fonts['med'].render(status[0], True, status[1])
     screen.blit(st_surf, (x, y))
     y += 28
-
+    
     if final_path is not None:
         _panel_kv(screen, fonts, x, y, "Path length", f"{len(final_path)} cells")
         y += 24
-
+    
     # Legend at the bottom
     ly = panel_rect.bottom - 16 - 8 * 22
     _panel_label(screen, fonts, x, ly, "LEGEND")
@@ -414,7 +445,7 @@ def _draw_panel(screen, panel_rect, state, source, target, net_name, fonts,
     _legend_row(screen, fonts, x, ly, C_VISITED,  "Visited");      ly += 22
     _legend_row(screen, fonts, x, ly, C_CURRENT,  "Expanding");    ly += 22
     _legend_row(screen, fonts, x, ly, C_PATH,     "Routed trace"); ly += 22
-
+    
     # Hint
     hint = fonts['small'].render("SPACE: pause   ESC: quit", True, C_TEXT_DIM)
     screen.blit(hint, (x, panel_rect.bottom - 22))
@@ -438,29 +469,28 @@ def _legend_row(screen, fonts, x, y, color, label):
     screen.blit(surf, (x + 24, y))
 
 
-# ─── End-of-search animations ──────────────────────────────────────────────
-
+# End-of-search animations
 def _animate_path_reveal(screen, grid, board_rect, panel_rect,
                          state, source, target, net_name, path, fonts, clock):
     """Dramatic reveal: the path draws itself from source to target."""
     total_ms = PATH_DRAW_MS * max(1, len(path) - 1)
     elapsed  = 0
-
+    
     while elapsed < total_ms:
         dt = clock.tick(60)
         elapsed += dt
-
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit(); sys.exit()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 pygame.quit(); sys.exit()
-
+        
         progress = min(1.0, elapsed / total_ms)
-
+        
         _draw_background(screen, board_rect, panel_rect)
         _draw_grid(screen, grid, board_rect, state, source, target, path=None)
-
+        
         # Partial path
         if len(path) >= 2:
             # Hack: clip the path for progress
@@ -479,7 +509,7 @@ def _animate_path_reveal(screen, grid, board_rect, panel_rect,
                 py = p0[1] + (p1[1] - p0[1]) * partial
                 pygame.draw.line(screen, C_PATH_GLOW, p0, (px, py), width=14)
                 pygame.draw.line(screen, C_PATH,      p0, (px, py), width=7)
-
+        
         _draw_panel(screen, panel_rect, state, source, target, net_name,
                     fonts, searching=False, final_path=path)
         pygame.display.flip()
